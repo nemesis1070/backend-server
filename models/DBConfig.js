@@ -1,10 +1,11 @@
 class config {
     constructor() {
 
-        this.user = '....';
-        this.password = '...';
-        this.server = '....';
-        this.port = 11111;
+        this.user = 'xxx';
+        this.password = 'xxxx';
+        this.server = 'xxxxxx';
+        this.port = 1111;
+        this.database = 'xxxxxxx';
 
     }
 }
