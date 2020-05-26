@@ -67,6 +67,7 @@ app.put('/:id', autenticaToken.verificarToken, (req, res) => {
     var body = req.body;
     sql.connect(configDB, function(err) {
 
+		console.log(body);
         if (err) console.log(err);
 
         // create Request object
@@ -106,8 +107,8 @@ app.put('/:id', autenticaToken.verificarToken, (req, res) => {
 
 ////////////////////////////////      crear usuario
 
-app.post('/', autenticaToken.verificarToken, (req, res) => { /// el token se envia como parametro opcional ? en la url se envia como segundo parametro, se envia al metodo de verificacion del token que se importo
-
+//app.post('/', autenticaToken.verificarToken, (req, res) => { /// el token se envia como parametro opcional ? en la url se envia como segundo parametro, se envia al metodo de verificacion del token que se importo
+app.post('/', (req, res) => {
     var configDB = new config();
     var body = req.body;
     console.log(req.usuario);
@@ -137,8 +138,8 @@ app.post('/', autenticaToken.verificarToken, (req, res) => { /// el token se env
 
                 res.status(200).json({
                     ok: true,
-                    usuarios: dbData,
-                    usuarioToken: req.usuario /// esa variable se llena al invocar el metodo  autenticaToken.verificarToken
+                    usuarios: 'usuario registrado en DB'
+                    //usuarioToken: req.usuario /// esa variable se llena al invocar el metodo  autenticaToken.verificarToken
                 });
 
 

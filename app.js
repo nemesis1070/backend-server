@@ -11,6 +11,13 @@ var bodyParser = require('body-parser');
 // defino mi servidor express
 var app = express();
 
+// HABILITAR CORS -- recibir peticiones de dominios externos
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", ""); // url frontend
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS"); // opciones para esten habilitados y se puedan ejecutar los metodos 
+  next();
+});
 /// body parser 
 
 // parse application/x-www-form-urlencoded

@@ -88,12 +88,13 @@ app.post('/google', async(req, res) => {
                     mensaje: 'debe usar su autenticacion normal'
                 });
             } else {
-                //var token = jwt.sign({ usuario: googleUsr.nombre }, fraCla, { expiresIn: 14400 }) /// 4 horas
+                var token = jwt.sign({ usuario: googleUsr.nombre }, fraseCla, { expiresIn: 14400 }) /// 4 horas
 
                 res.status(200).json({
                     ok: true,
-                    mensaje: 'ok',
-                    Token: 'uy'
+                    mensaje: 'inicio de sesion correcto',
+					datos: data,
+                    Token: token
                 });
 
             }
