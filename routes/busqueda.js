@@ -22,8 +22,8 @@ app.get('/coleccion/:tabla/:busqueda', (req, res, next) => {
             promesa = buscarHospitales(stringQueryH);
             break
         case 'usuarios':
-            var stringQueryU = `select idusuario, nombre,Email, img, role from usuarios where nombre COLLATE Latin1_General_CI_AI LIKE '%${busqueda}%' COLLATE Latin1_General_CI_AI UNION `;
-            stringQueryU += `select idusuario, nombre,Email, img, role from usuarios where email COLLATE Latin1_General_CI_AI LIKE '%${busqueda}%' COLLATE Latin1_General_CI_AI`;
+            var stringQueryU = `select IdUsuario, Nombre,Email, Img, Role from usuarios where nombre COLLATE Latin1_General_CI_AI LIKE '%${busqueda}%' COLLATE Latin1_General_CI_AI UNION `;
+            stringQueryU += `select IdUsuario, Nombre,Email, Img, Role from usuarios where email COLLATE Latin1_General_CI_AI LIKE '%${busqueda}%' COLLATE Latin1_General_CI_AI`;
 
             promesa = buscarUsuarios(stringQueryU);
             break
@@ -52,8 +52,8 @@ app.get('/todo/:busqueda', (req, res, next) => {
 
     var stringQueryH = `select * from hospitales where nombre COLLATE Latin1_General_CI_AI LIKE '%${busqueda}%' COLLATE Latin1_General_CI_AI`;
     var stringQueryM = `select * from medicos where nombre COLLATE Latin1_General_CI_AI LIKE '%${busqueda}%' COLLATE Latin1_General_CI_AI`;
-    var stringQueryU = `select idusuario, nombre,Email, img, role from usuarios where nombre COLLATE Latin1_General_CI_AI LIKE '%${busqueda}%' COLLATE Latin1_General_CI_AI UNION `;
-    stringQueryU += `select idusuario, nombre,Email, img, role from usuarios where email COLLATE Latin1_General_CI_AI LIKE '%${busqueda}%' COLLATE Latin1_General_CI_AI`;
+    var stringQueryU = `select IdUsuario, Nombre,Email, Img, Role from usuarios where nombre COLLATE Latin1_General_CI_AI LIKE '%${busqueda}%' COLLATE Latin1_General_CI_AI UNION `;
+    stringQueryU += `select IdUsuario, Nombre,Email, Img, Role from usuarios where email COLLATE Latin1_General_CI_AI LIKE '%${busqueda}%' COLLATE Latin1_General_CI_AI`;
 
     Promise.all([
             buscarHospitales(stringQueryH),

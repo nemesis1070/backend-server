@@ -12,45 +12,83 @@ var config = require('../models/DBConfig');
 ////////////////////////////////      obtener todos los usuarios
 app.get('/', (req, res, next) => {
 
-    var parametro = req.query.desde || 0; // si el parametro viene vacio coloca 0
+    var parametropag = req.query.desde || 0; // si el parametro viene vacio coloca 0
     /* console.log(req.query.id); */
+    parametropag: Number(parametropag);
+
+    var promesa;
+
+
+
     var configDB = new config();
 
     var parametro = req.query.id;
 
     var stringQuery;
+    var stringQueryPag;
     if (parametro == null) {
 
-        stringQuery = "select idusuario, nombre,Email, img, role from usuarios";
-    } else {
-        stringQuery = "select * from usuarios where idusuario=" + parametro;
-    }
+        stringQuery = "select COUNT(*) as totalRegistros from usuarios";
+        stringQueryPag = "SELECT * FROM usuarios ORDER BY IdUsuario OFFSET " + parametropag + " ROWS FETCH NEXT " + 5 + " ROWS ONLY";
 
-    sql.connect(configDB, function(err) {
+        promesa = buscarUsuarios(stringQuery);
+        promesa.then(data => {
 
-        if (err) console.log(err);
+            var promesaPag = buscarUsuariosPag(stringQueryPag);
 
-        // create Request object
-        var request = new sql.Request();
-        request.query(stringQuery)
-            .then(function(dbData) {
-                if (dbData == null || dbData.length === 0) {
-                    return;
-                } else {
-                    res.status(200).json({
-                        ok: true,
-                        usuarios: dbData.recordset
-                    });
-                }
+            promesaPag.then(res1 => {
 
-            })
-            .catch(function(error) {
-                res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error al consultar DB'
+                return res.status(200).json({
+                    ok: true,
+                    usuarios: res1,
+                    total: data[0].totalRegistros
                 });
             });
-    });
+
+        });
+
+        stringQuery = "SELECT * FROM usuarios ORDER BY IdUsuario OFFSET " + parametropag + " ROWS FETCH NEXT " + 5 + " ROWS ONLY";
+        console.log(stringQuery);
+        // stringQuery = "select idusuario, nombre,Email, img, role, google from usuarios";
+    } else {
+        stringQuery = "select * from usuarios where idusuario=" + parametro;
+        promesa = buscarUsuarios(stringQuery);
+        promesa.then(data => {
+
+            return res.status(200).json({
+                ok: true,
+                usuarios: data
+            });
+        });
+
+    }
+
+    /*     sql.connect(configDB, function(err) {
+
+            if (err) console.log(err);
+
+            // create Request object
+            var request = new sql.Request();
+            request.query(stringQuery)
+                .then(function(dbData) {
+                    if (dbData == null || dbData.length === 0) {
+                        return;
+                    } else {
+                        res.status(200).json({
+                            ok: true,
+                            usuarios: dbData.recordset,
+                            total: dbData.rowsAffected[0]
+                        });
+                    }
+
+                })
+                .catch(function(error) {
+                    res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al consultar DB' + err
+                    });
+                });
+        }); */
 
 });
 
@@ -65,9 +103,10 @@ app.put('/:id', autenticaToken.verificarToken, (req, res) => {
     var configDB = new config();
     var id = req.params.id; /// obtener el parametro que viene en la url del servicio
     var body = req.body;
+
     sql.connect(configDB, function(err) {
 
-		console.log(body);
+        console.log(body);
         if (err) console.log(err);
 
         // create Request object
@@ -77,7 +116,7 @@ app.put('/:id', autenticaToken.verificarToken, (req, res) => {
 
         sqlQuery += `Nombre='${body.Nombre}', `
         sqlQuery += `Email='${body.Email}', `
-        sqlQuery += `Role='${body.Role} '`
+        sqlQuery += `Role='${body.Role}'`
         sqlQuery += `where idusuario=${id}`
         console.log(sqlQuery);
 
@@ -139,7 +178,7 @@ app.post('/', (req, res) => {
                 res.status(200).json({
                     ok: true,
                     usuarios: 'usuario registrado en DB'
-                    //usuarioToken: req.usuario /// esa variable se llena al invocar el metodo  autenticaToken.verificarToken
+                        //usuarioToken: req.usuario /// esa variable se llena al invocar el metodo  autenticaToken.verificarToken
                 });
 
 
@@ -196,7 +235,46 @@ app.delete('/:id', autenticaToken.verificarToken, (req, res) => {
 
 
 
+function buscarUsuarios(stringQuery) {
+    var configDB = new config();
 
+    return new Promise((resolve, reject) => {
+        sql.connect(configDB, function(err) {
+            // create Request object
+            var request = new sql.Request();
+
+            request.query(stringQuery, function(err, table) {
+                if (table == null || table.recordset == 0) {
+                    resolve(table.recordset);
+                } else {
+                    resolve(table.recordset);
+                }
+
+            });
+        });
+    })
+}
+
+
+function buscarUsuariosPag(stringQuery) {
+    var configDB = new config();
+
+    return new Promise((resolve, reject) => {
+        sql.connect(configDB, function(err) {
+            // create Request object
+            var request = new sql.Request();
+
+            request.query(stringQuery, function(err, table) {
+                if (table == null || table.recordset == 0) {
+                    resolve(table.recordset);
+                } else {
+                    resolve(table.recordset);
+                }
+
+            });
+        });
+    })
+}
 
 
 
