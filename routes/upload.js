@@ -137,7 +137,7 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
                     updateTabla(stringUpdateU, res).then(respU => {
                         res.status(200).json({
                             ok: true,
-                            mensaje: respU
+                            mensaje: nombreArchivo
                         });
 
                     });
@@ -189,7 +189,7 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
                     updateTabla(stringUpdateH, res).then(respU => {
                         res.status(200).json({
                             ok: true,
-                            mensaje: respU
+                            mensaje: nombreArchivo
                         });
 
                     });
@@ -240,7 +240,7 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
                     updateTabla(stringUpdateM, res).then(respU => {
                         res.status(200).json({
                             ok: true,
-                            mensaje: respU
+                            mensaje: nombreArchivo
                         });
 
                     });

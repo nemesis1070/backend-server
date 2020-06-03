@@ -47,9 +47,6 @@ app.get('/', (req, res, next) => {
 
         });
 
-        stringQuery = "SELECT * FROM usuarios ORDER BY IdUsuario OFFSET " + parametropag + " ROWS FETCH NEXT " + 5 + " ROWS ONLY";
-        console.log(stringQuery);
-        // stringQuery = "select idusuario, nombre,Email, img, role, google from usuarios";
     } else {
         stringQuery = "select * from usuarios where idusuario=" + parametro;
         promesa = buscarUsuarios(stringQuery);

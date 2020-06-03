@@ -18,8 +18,8 @@ app.get('/', (req, res) => {
 
     var parametro = req.query.id;
 
-    var pag = req.query.desde || 0; // si el parametro viene vacio coloca 0
-    var limite = 3;
+    var pag = req.query.desde || 1; // si el parametro viene vacio coloca 0
+    var limite = 200;
 
     var stringQuery;
 
@@ -72,7 +72,7 @@ app.get('/', (req, res) => {
 
                     res.status(200).json({
                         ok: true,
-                        mensaje: table.recordset,
+                        medicos: table.recordset,
                         total: totalRegistros
                     });
                 }
@@ -85,6 +85,27 @@ app.get('/', (req, res) => {
 
 
 });
+
+
+////////////////////////////////      obtener medico
+
+app.get('/:id', (req, res) => {
+
+    var id = req.params.id;
+    var stringQuery;
+
+    stringQuery = "select * from medicos where IdMedicos='" + id + "'";
+    promesa = buscarMedico(stringQuery);
+    promesa.then(data => {
+        return res.status(200).json({
+            ok: true,
+            medico: data
+        });
+    });
+
+});
+
+////////////////////////////////
 
 
 ////////////////////////////////      actualizar medico
@@ -141,6 +162,7 @@ app.post('/', autenticaToken.verificarToken, (req, res) => { /// el token se env
 
     var configDB = new config();
     var body = req.body;
+    var promesa;
 
     sql.connect(configDB, function(err) {
 
@@ -149,16 +171,29 @@ app.post('/', autenticaToken.verificarToken, (req, res) => { /// el token se env
         // create Request object
         var request = new sql.Request();
 
-        var sqlQuery = `insert into medicos (Img, Usuario, Hospital, Nombre) values ('${body.Img}','${req.usuario.IdUsuario}','${body.Hospital}','${body.Nombre}')`;
+        var sqlQuery = `insert into medicos (Img, Usuario, Hospital, Nombre) values ('${body.Img}','${req.usuario.IdUsuario}','${parseInt(body.HospitalId)}','${body.Nombre}')`;
+        var stringQuery = `select * from medicos where Nombre='${body.Nombre}'`;
 
         request.query(sqlQuery)
             .then(function(dbData) {
 
-                res.status(200).json({
+                promesa = buscarMedico(stringQuery);
+
+                promesa.then(res1 => {
+
+                    console.log(res1);
+                    return res.status(200).json({
+                        ok: true,
+                        medico: res1,
+                        usuarioToken: req.usuario /// esa variable se llena al invocar el metodo  autenticaToken.verificarToken
+                    });
+                });
+
+                /*res.status(200).json({
                     ok: true,
                     medico: dbData,
                     usuarioToken: req.usuario /// esa variable se llena al invocar el metodo  autenticaToken.verificarToken
-                });
+                }); */
 
 
             })
@@ -211,6 +246,28 @@ app.delete('/:id', autenticaToken.verificarToken, (req, res) => {
 
 });
 
+
+function buscarMedico(stringQuery) {
+    var configDB = new config();
+
+    return new Promise((resolve, reject) => {
+        sql.connect(configDB, function(err) {
+            // create Request object
+            var request = new sql.Request();
+
+            console.log(stringQuery);
+            request.query(stringQuery, function(err, table) {
+                if (table == null || table.recordset == 0) {
+                    //reject('No hay medicos registrados', err);
+                    resolve(table.recordset);
+                } else {
+                    resolve(table.recordset);
+                }
+
+            });
+        });
+    })
+}
 
 
 

@@ -17,7 +17,132 @@ app.get('/', (req, res) => {
 
     var parametro = req.query.id;
 
+    var stringQueryCount;
     var stringQuery;
+    var promesa;
+
+    console.log(parametro);
+    if (parametro == null) {
+
+        stringQueryCount = "select COUNT(*) as totalRegistros from hospitales";
+        stringQuery = "SELECT * FROM hospitales";
+
+        promesa = buscarData(stringQueryCount);
+        promesa.then(data => {
+
+            var promesaPag = buscarData(stringQuery);
+
+            promesaPag.then(res1 => {
+
+                return res.status(200).json({
+                    ok: true,
+                    hospitales: res1,
+                    total: data[0].totalRegistros
+                });
+            });
+
+        }).catch(err => {
+            return res.status(500).json({
+                ok: false,
+                mensaje: err.originalError.info.message
+            });
+        });;
+
+    }
+
+
+    /*   var camposUsuario = 'U.idusuario as UsuarioId, U.nombre as UsuarioNombre,U.Email as UsuarioEmail, U.img as UsuarioImg, U.role as UsuarioRole';
+       var inner = "inner join usuarios U on U.idusuario = h.Usuario";
+
+       if (parametro == null) {
+
+           stringQuery = `select h.IdHospital, h.Nombre, h.Img,${camposUsuario} from hospitales h ${inner}`;
+       } else {
+           stringQuery = `select h.IdHospital, h.Nombre, h.Img, ${camposUsuario} from hospitales h ${inner} where idhospital=${parametro}`;
+       }
+
+        console.log(stringQuery);
+
+       sql.connect(configDB, function(err) {
+
+           if (err) console.log(err);
+
+           // create Request object
+           var request = new sql.Request();
+
+           var data = request.query(stringQuery, function(err, table) {
+               if (err) {
+                   res.status(500).json({
+                       ok: true,
+                       mensaje: 'Error conexion DB'
+                   });
+               } else {
+
+                   if (table == null || table.recordset == 0) {
+                       res.status(400).json({
+                           ok: true,
+                           mensaje: 'No hay hospitales registrados'
+                       });
+
+                   } else {
+                       res.status(200).json({
+                           ok: true,
+                           mensaje: table.recordset
+                       });
+                   }
+
+               }
+
+           });
+
+       }); */
+
+
+});
+
+
+////////////////////////////////   buscar hospital por id
+
+app.get('/:id', (req, res) => {
+
+    var id = req.params.id;
+
+    var stringQueryH = 'Select * from hospitales where idhospital=' + id;
+    var stringQueryU = 'Select Nombre,Email,Img from usuarios where idusuario=';
+
+    promesa = buscarData(stringQueryH);
+    promesa.then(data => {
+
+        console.log(data);
+        if (data === 0) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'El Hospital no existe en la BD'
+            });
+        } else {
+            stringQueryU += data[0].Usuario;
+            var promesa1 = buscarData(stringQueryU);
+
+            promesa1.then(res1 => {
+
+                return res.status(200).json({
+                    ok: true,
+                    hospital: data,
+                    usuario: res1
+                });
+            });
+        }
+
+    }).catch(err => {
+        console.log(err);
+        /* return res.status(500).json({
+            ok: false,
+            mensaje: err
+        }); */
+    });
+
+
+    /* var stringQuery;
     var camposUsuario = 'U.idusuario as UsuarioId, U.nombre as UsuarioNombre,U.Email as UsuarioEmail, U.img as UsuarioImg, U.role as UsuarioRole';
     var inner = "inner join usuarios U on U.idusuario = h.Usuario";
 
@@ -62,10 +187,11 @@ app.get('/', (req, res) => {
 
         });
 
-    });
+    }); */
 
 
 });
+
 
 
 ////////////////////////////////      actualizar hospital
@@ -190,9 +316,29 @@ app.delete('/:id', autenticaToken.verificarToken, (req, res) => {
 });
 
 
+function buscarData(stringQuery) {
+    var configDB = new config();
 
+    return new Promise((resolve, reject) => {
+        sql.connect(configDB, function(err) {
+            // create Request object
+            var request = new sql.Request();
 
+            request.query(stringQuery, function(err1, table) {
 
+                if (table == null || table.recordset == 0) {
+                    resolve(table.rowsAffected[0]);
+                } else {
+                    resolve(table.recordset);
+                }
 
+                if (err1) {
+                    reject(err1);
+                }
+
+            });
+        });
+    })
+}
 
 module.exports = app; /// con esto se puede utilizar el app fuera de este archivo en el app.js que esta fuera de la carpeta routes
