@@ -93,8 +93,9 @@ app.post('/google', async(req, res) => {
                 res.status(200).json({
                     ok: true,
                     mensaje: 'inicio de sesion correcto',
-					datos: data,
-                    Token: token
+                    datos: data,
+                    Token: token,
+                    menu: obtenerMenu(data[0].Role)
                 });
 
             }
@@ -147,7 +148,7 @@ app.post('/', (req, res) => {
                                 ok: true,
                                 mensaje: table.recordset[0],
                                 Token: token,
-
+                                menu: obtenerMenu(table.recordset[0].Role)
                             });
                         }
                     });
@@ -203,5 +204,35 @@ function insertarUsuarios(stringQuery) {
     })
 }
 
+function obtenerMenu(ROLE) {
+
+    menu = [{
+            titulo: 'Principal',
+            icono: 'mdi mdi-gauge',
+            submenu: [
+                { titulo: 'Dashboard', url: '/dashboard' },
+                { titulo: 'ProgressBar', url: '/progress' },
+                { titulo: 'Graficas', url: '/grafica1' },
+                { titulo: 'Promesas', url: '/promesas' },
+                { titulo: 'RXJS', url: '/rxjs' }
+            ]
+        },
+        {
+            titulo: 'Mantenimiento',
+            icono: 'mdi mdi-folder-lock-open',
+            submenu: [
+                /* {titulo: 'Usuarios', url: '/usuarios'}, */
+                { titulo: 'Hospitales', url: '/hospitales' },
+                { titulo: 'Medicos', url: '/medicos' }
+            ]
+        }
+    ];
+
+    if (ROLE === 'ADMIN_ROLE') {
+        menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
+    }
+
+    return menu;
+}
 
 module.exports = app; /// con esto se puede utilizar el app fuera de este archivo en el app.js que esta fuera de la carpeta routes

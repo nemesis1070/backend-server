@@ -95,13 +95,49 @@ app.get('/', (req, res, next) => {
 ////////////////////////////////      actualizar usuario
 
 
-app.put('/:id', autenticaToken.verificarToken, (req, res) => {
+app.put('/:id', [autenticaToken.verificarToken, autenticaToken.verificarAdmin_o_MismoUsuario], (req, res) => {
 
     var configDB = new config();
     var id = req.params.id; /// obtener el parametro que viene en la url del servicio
     var body = req.body;
 
-    sql.connect(configDB, function(err) {
+    var promesa;
+	var stringQuery;
+	stringQuery = "select COUNT(*) as totalRegistros from usuarios where Email='"+body.Email+"'";
+	var sqlQueryActualizacion = `update usuarios SET `;
+
+       sqlQueryActualizacion += `Nombre='${body.Nombre}', `
+       sqlQueryActualizacion += `Email='${body.Email}', `
+       sqlQueryActualizacion += `Role='${body.Role}'`
+       sqlQueryActualizacion += `where idusuario=${id}`
+		
+
+	promesa = buscarUsuarios(stringQuery);
+        promesa.then(data => {
+
+			if( data[0].totalRegistros > 0){
+			return res.status(400).json({
+                        ok: false,
+						mensaje: 'El Email ya se encuentra registrado',
+                    });
+			}
+			else{
+				
+                var promesa1 = ejecutarQuery(sqlQueryActualizacion);
+			    
+                promesa1.then(res1 => {
+			    
+                    return res.status(200).json({
+                        ok: true,
+                        usuarios: res1,                    
+                    });
+                });
+			}
+        });
+		
+
+
+    /* sql.connect(configDB, function(err) {
 
         console.log(body);
         if (err) console.log(err);
@@ -134,9 +170,8 @@ app.put('/:id', autenticaToken.verificarToken, (req, res) => {
                     Error: error
                 });
             });
-    });
+    }); */
 
-    /*  */
 
 });
 
@@ -157,10 +192,38 @@ app.post('/', (req, res) => {
         usuarioCreado.role = body.Role,
         usuarioCreado.google = body.Google
 
+	
+	var promesa;
+	var stringQuery;
+	stringQuery = "select COUNT(*) as totalRegistros from usuarios where Email='"+body.Email+"'";
+	var sqlQueryCreacion = `insert into usuarios (Nombre,Email,Password,Img,Role,Google) values ('${body.Nombre}','${body.Email}','${bcrypt.hashSync(body.Password, 10)}','${body.Img}','${body.Role}','${body.Google}')`;
 
-    console.log(usuarioCreado);
 
-    sql.connect(configDB, function(err) {
+	promesa = buscarUsuarios(stringQuery);
+        promesa.then(data => {
+
+			if( data[0].totalRegistros > 0){
+			return res.status(400).json({
+                        ok: false,
+						mensaje: 'El Email ya se encuentra registrado',
+                    });
+			}
+			else{
+				
+                var promesa1 = ejecutarQuery(sqlQueryCreacion);
+			    
+                promesa1.then(res1 => {
+			    
+                    return res.status(200).json({
+                        ok: true,
+                        usuarios: res1,                    
+                    });
+                });
+			}
+        });
+		
+		
+    /* sql.connect(configDB, function(err) {
 
         if (err) console.log(err);
 
@@ -187,16 +250,16 @@ app.post('/', (req, res) => {
                     Error: error
                 });
             });
-    });
+    }); */
 
 });
 
 
 
-////////////////////////////////      eliimnar usuario
+////////////////////////////////      elimnar usuario
 
 
-app.delete('/:id', autenticaToken.verificarToken, (req, res) => {
+app.delete('/:id', [autenticaToken.verificarToken, autenticaToken.verificarAdmin_Role], (req, res) => {
 
     var id = req.params.id; /// obtener el parametro que viene en la url del servicio
     var configDB = new config();
@@ -233,6 +296,26 @@ app.delete('/:id', autenticaToken.verificarToken, (req, res) => {
 
 
 function buscarUsuarios(stringQuery) {
+    var configDB = new config();
+
+    return new Promise((resolve, reject) => {
+        sql.connect(configDB, function(err) {
+            // create Request object
+            var request = new sql.Request();
+
+            request.query(stringQuery, function(err, table) {
+                if (table == null || table.recordset == 0) {
+                    resolve(table.recordset);
+                } else {
+                    resolve(table.recordset);
+                }
+
+            });
+        });
+    })
+}
+
+function ejecutarQuery(stringQuery) {
     var configDB = new config();
 
     return new Promise((resolve, reject) => {
