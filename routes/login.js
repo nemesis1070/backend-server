@@ -6,11 +6,27 @@ var jwt = require('jsonwebtoken'); /// libreria para crear tokens
 var { fraseCla } = require('../config/config'); /// asi se obtienen valor variables creadas desde otro archivo
 var config = require('../models/DBConfig');
 var usuarioInfo = require('../models/usuario');
+var mdAutenticacion = require('../middlewares/autenticacion');
+
 //// google
 var { CLIENT_ID } = require('../config/config'); /// asi se obtienen valor variables creadas desde otro archivo
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(CLIENT_ID);
 
+
+
+/// Renovar Token
+app.get('/renuevatoken', mdAutenticacion.verificarToken, (req, res) => {
+
+    var token = jwt.sign({ usuario: req.usuario }, fraseCla, { expiresIn: 14400 }) /// 4 horas
+
+
+    res.status(200).json({
+        ok: true,
+        usuario: req.usuario,
+        Token: token
+    });
+});
 
 /// autenticacion google
 
